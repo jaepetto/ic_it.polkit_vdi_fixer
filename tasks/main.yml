@@ -1,0 +1,18 @@
+---
+# tasks file for ic_it.polkit_vdi_fixer
+- name: make sure that the python3-lxml library are present
+  package:
+    name: python3-lxml
+    state: present
+    update_cache: yes
+  become: True
+
+- name: Set the policy action to allow users to reboot and shutdown
+  xml:
+    path: /usr/share/polkit-1/actions/org.freedesktop.login1.policy
+    xpath: "/policyconfig/action[@id='org.freedesktop.login1.{{ item[0] }}']/defaults/{{ item[1] }}"
+    value: "yes"
+  with_nested:
+    - ['power-off', 'power-off-multiple-sessions', 'power-off-ignore-inhibit', 'reboot', 'reboot-multiple-sessions', 'reboot-ignore-inhibit', 'halt', 'halt-multiple-sessions', 'halt-ignore-inhibit', 'suspend', 'suspend-multiple-sessions', 'suspend-ignore-inhibit', 'hibernate', 'hibernate-multiple-sessions', 'hibernate-ignore-inhibit', 'set-wall-message']
+    - ['allow_active', 'allow_inactive', 'allow_any']
+  become: True
